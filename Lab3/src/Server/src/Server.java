@@ -10,37 +10,28 @@ public class Server
 	{
 		try
 		(
-			ServerSocket serverSocket = new ServerSocket(8080);
+			TcpServer tcpServer = new TcpServer(8080);
 		)
 		{
 			while (true)
 			{
 				try
-				(
-					Socket clientSocket = serverSocket.accept();
-				    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-				    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-				)
 				{
+					BufferedReader in = tcpServer.Receive();
+					
 					String input = "";
 					int c;
-					
 					while ((c = in.read()) != -1)
 					{
 						input += (char)c;
 					}
-					clientSocket.shutdownInput();
+					in.close();
 					
 					System.out.println(input);
 					
 					String output = "Response";
-					
-					for (char c2: output.toCharArray())
-					{
-						out.print(c2);
-					}
-					out.flush();
-					clientSocket.shutdownOutput();
+
+					tcpServer.Send(output);
 				}
 				catch (Exception e)
 				{

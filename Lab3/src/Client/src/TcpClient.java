@@ -8,9 +8,9 @@ import java.net.Socket;
 
 public class TcpClient implements AutoCloseable
 {
-	Socket mSocket = null;
-	PrintWriter mOut = null;
-	BufferedReader mIn = null;
+	private Socket mSocket = null;
+	private PrintWriter mOut = null;
+	private BufferedReader mIn = null;
 	
 	public TcpClient(InetAddress address, int port) throws IOException
 	{
