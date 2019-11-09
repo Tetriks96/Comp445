@@ -13,12 +13,16 @@ public class TcpClient
 	private int mPort;
 	private InetAddress mServerAddress;
 	private int mServerPort;
+	private InetAddress mRouterAddress;
+	private int mRouterPort;
 	
 	public TcpClient(int port, InetAddress serverAddress, int serverPort) throws UnknownHostException
 	{
 		mPort = port;
 		mServerAddress = serverAddress;
 		mServerPort = serverPort;
+		mRouterAddress = InetAddress.getByName("localhost");
+		mRouterPort = 3000;
 	}
 	
 	public void Send(String payload) throws IOException
@@ -47,7 +51,7 @@ public class TcpClient
 				output.put((byte) c);
 			}
 
-			DatagramPacket dp = new DatagramPacket(output.array(), output.position(), mServerAddress, mServerPort);
+			DatagramPacket dp = new DatagramPacket(output.array(), output.position(), mRouterAddress, mRouterPort);
 			ds.send(dp);
 		}
 	}

@@ -13,12 +13,16 @@ public class TcpServer
 	private int mPort;
 	private InetAddress mClientAddress;
 	private int mClientPort;
+	private InetAddress mRouterAddress;
+	private int mRouterPort;
 	
 	public TcpServer(int port) throws IOException
 	{
 		mPort = port;
 		mClientAddress = InetAddress.getByName("localhost");
 		mClientPort = 8081;
+		mRouterAddress = InetAddress.getByName("localhost");
+		mRouterPort = 3000;
 	}
 
 	public BufferedReader Receive() throws IOException
@@ -71,7 +75,7 @@ public class TcpServer
 				output.put((byte) c);
 			}
 
-			DatagramPacket dp = new DatagramPacket(output.array(), output.position(), mClientAddress, mClientPort);
+			DatagramPacket dp = new DatagramPacket(output.array(), output.position(), mRouterAddress, mRouterPort);
 			ds.send(dp);
 		}
 	}
