@@ -3,7 +3,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Iterator;
 
 public class Server
 {
@@ -22,7 +21,7 @@ public class Server
 	{
 		try
 		(
-			TcpServer tcpServer = new TcpServer(this.port);
+			ServerSocket serverSocket = new ServerSocket(this.port);
 		)
 		{
 			System.out.println("Http File Server started!");
@@ -31,11 +30,12 @@ public class Server
 			while (true)
 			{
 				try
+				(
+					Socket clientSocket = serverSocket.accept();
+				    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+				    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+				)
 				{
-					BufferedReader in = tcpServer.GetInput();
-					
-					StringBuilder out = new StringBuilder(8096);
-					
 					String input;
 					input = in.readLine();
 					PrintIfVerbose(input);
@@ -44,7 +44,7 @@ public class Server
 					
 					if (firstLine.length < 2)
 					{
-						out.append("HTTP/1.0 400 Bad Request" + "\n");
+						out.println("HTTP/1.0 400 Bad Request");
 						return;
 					}
 					
@@ -86,24 +86,16 @@ public class Server
 				    
 				    if (param.contains(".."))
 				    {
-						out.append("HTTP/1.0 403 Forbidden" + "\n");
+						out.println("HTTP/1.0 403 Forbidden");
 				    }
 				    else if (isPostRequest)
 				    {
-				        out.append(fileSystem.Write(param, content) + "\n");
+				        out.println(fileSystem.Write(param, content));
 				    }
 				    else
 				    {
-				        out.append(fileSystem.Read(param) + "\n");
+				        out.println(fileSystem.Read(param));
 				    }
-				    
-				    tcpServer.SendResponse(out.toString());
-				}
-				catch (Exception e)
-				{
-					System.out.println("An exception occured while handling a request:");
-					System.out.println(e);
-					System.out.println();
 				}
 			}
 		}
