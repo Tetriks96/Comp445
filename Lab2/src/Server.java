@@ -97,6 +97,11 @@ public class Server
 				        out.println(fileSystem.Read(param));
 				    }
 				}
+				catch (Exception e)
+				{
+					System.out.println("An exception occured:");
+					System.out.println(e);
+				}
 			}
 		}
 		catch (Exception e)
