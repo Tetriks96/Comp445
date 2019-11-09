@@ -12,9 +12,9 @@ public class Client
 		{
 			String output = args.length > 0 ? args[0] : "message";
 			
-			int port = 8081;
+			short port = 8081;
 			InetAddress serverAddress = InetAddress.getByName("localhost");
-			int serverPort = 8080;
+			short serverPort = 8080;
 
 			TcpClient tcpClient = new TcpClient(port, serverAddress, serverPort);
 			

@@ -5,18 +5,17 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class TcpClient
 {
 	private int mPort;
 	private InetAddress mServerAddress;
-	private int mServerPort;
+	private short mServerPort;
 	private InetAddress mRouterAddress;
 	private int mRouterPort;
 	
-	public TcpClient(int port, InetAddress serverAddress, int serverPort) throws UnknownHostException
+	public TcpClient(int port, InetAddress serverAddress, short serverPort) throws UnknownHostException
 	{
 		mPort = port;
 		mServerAddress = serverAddress;
@@ -32,26 +31,11 @@ public class TcpClient
 			DatagramSocket ds = new DatagramSocket(mPort);
 		)
 		{
-			ByteBuffer output = ByteBuffer.allocate(1024);
+			Packet packet = new Packet((byte)1, 1000, mServerAddress, mServerPort, payload);
 			
-			// Packet type
-			output.put((byte) 1);
-			
-			// Sequence Number
-			output.putInt(1000);
-			
-			// Peer IP
-			output.put(mServerAddress.getAddress());
-			
-			// Peer port
-			output.putShort((short) mServerPort);
-			
-			for (char c: payload.toCharArray())
-			{
-				output.put((byte) c);
-			}
+			byte[] output = packet.getBytes();
 
-			DatagramPacket dp = new DatagramPacket(output.array(), output.position(), mRouterAddress, mRouterPort);
+			DatagramPacket dp = new DatagramPacket(output, output.length, mRouterAddress, mRouterPort);
 			ds.send(dp);
 		}
 	}
@@ -71,10 +55,7 @@ public class TcpClient
 		    
 		    Packet packet = new Packet(data);
 
-			System.out.println("Packet type: " + packet.PacketType);
-			System.out.println("Sequence number: " + packet.SequenceNumber);
-			System.out.println("Client address: " + packet.PeerAddress);
-			System.out.println("Peer port: " + packet.PeerPort);
+		    System.out.println(packet.GetHeader());
 			
 			return new BufferedReader(new StringReader(packet.Payload));
 		}

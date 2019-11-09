@@ -1,20 +1,18 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class TcpServer
 {
 	private int mPort;
 	private InetAddress mClientAddress;
-	private int mClientPort;
+	private short mClientPort;
 	private InetAddress mRouterAddress;
-	private int mRouterPort;
+	private short mRouterPort;
 	
 	public TcpServer(int port) throws IOException
 	{
@@ -40,10 +38,7 @@ public class TcpServer
 		    
 		    Packet packet = new Packet(data);
 
-			System.out.println("Packet type: " + packet.PacketType);
-			System.out.println("Sequence number: " + packet.SequenceNumber);
-			System.out.println("Client address: " + packet.PeerAddress);
-			System.out.println("Peer port: " + packet.PeerPort);
+		    System.out.println(packet.GetHeader());
 			
 			return new BufferedReader(new StringReader(packet.Payload));
 		}
@@ -56,26 +51,11 @@ public class TcpServer
 			DatagramSocket ds = new DatagramSocket(mPort);
 		)
 		{
-			ByteBuffer output = ByteBuffer.allocate(1024);
+			Packet packet = new Packet((byte)2, 2000, mClientAddress, mClientPort, payload);
 			
-			// Packet type
-			output.put((byte) 2);
-			
-			// Sequence Number
-			output.putInt(2000);
-			
-			// Peer IP
-			output.put(mClientAddress.getAddress());
-			
-			// Peer port
-			output.putShort((short) mClientPort);
-			
-			for (char c: payload.toCharArray())
-			{
-				output.put((byte) c);
-			}
+			byte[] output = packet.getBytes();
 
-			DatagramPacket dp = new DatagramPacket(output.array(), output.position(), mRouterAddress, mRouterPort);
+			DatagramPacket dp = new DatagramPacket(output, output.length, mRouterAddress, mRouterPort);
 			ds.send(dp);
 		}
 	}
