@@ -9,10 +9,8 @@ public class Server
 	public static void main(String[] args)
 	{
 		try
-		(
-			TcpServer tcpServer = new TcpServer(8080);
-		)
 		{
+			TcpServer tcpServer = new TcpServer(8080);
 			while (true)
 			{
 				try
@@ -28,6 +26,7 @@ public class Server
 					in.close();
 					
 					System.out.println(input);
+					System.out.println();
 					
 					String output = "Response";
 

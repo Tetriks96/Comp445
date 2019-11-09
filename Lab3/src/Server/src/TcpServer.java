@@ -1,83 +1,78 @@
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.io.StringReader;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.math.BigInteger;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
-public class TcpServer implements AutoCloseable
+public class TcpServer
 {
-	private ServerSocket mServerSocket = null;
-	private Socket mClientSocket = null;
-	private PrintWriter mOut = null;
-	private BufferedReader mIn = null;
+	private int mPort;
+	private InetAddress mClientAddress;
+	private int mClientPort;
 	
 	public TcpServer(int port) throws IOException
 	{
-		mServerSocket = new ServerSocket(port);
-	}
-	
-	private void AcceptClient() throws IOException
-	{
-		mClientSocket = mServerSocket.accept();
-	    mOut = new PrintWriter(mClientSocket.getOutputStream(), true);
-	    mIn = new BufferedReader(new InputStreamReader(mClientSocket.getInputStream()));
-	}
-	
-	public BufferedReader Receive() throws IOException
-	{
-		AcceptClient();
-		
-		String input = "";
-		int c;
-		while ((c = mIn.read()) != -1)
-		{
-			input += (char)c;
-		}
-		mClientSocket.shutdownInput();
-		
-		return new BufferedReader(new StringReader(input));
-	}
-	
-	public void Send(String message) throws IOException
-	{
-		for (char c: message.toCharArray())
-		{
-			mOut.print(c);
-		}
-		mOut.flush();
-		mClientSocket.shutdownOutput();
-		
-		CloseClientConnection();
-	}
-	
-	private void CloseClientConnection() throws IOException
-	{
-		if (mClientSocket != null)
-		{
-			mClientSocket.close();
-		}
-		
-		if (mOut != null)
-		{
-			mOut.close();
-		}
-		
-		if (mIn != null)
-		{
-			mIn.close();
-		}
+		mPort = port;
+		mClientAddress = InetAddress.getByName("localhost");
+		mClientPort = 8081;
 	}
 
-	@Override
-	public void close() throws Exception
+	public BufferedReader Receive() throws IOException
 	{
-		CloseClientConnection();
-		
-		if (mServerSocket != null)
+		try
+		(
+			DatagramSocket ds = new DatagramSocket(mPort);
+		)
 		{
-			mServerSocket.close();
+		    byte[] buf = new byte[1024];
+		    DatagramPacket dp = new DatagramPacket(buf, 1024);
+		    ds.receive(dp);
+		    
+		    byte[] data = Arrays.copyOfRange(dp.getData(), 0, dp.getLength());
+		    
+		    Packet packet = new Packet(data);
+
+			System.out.println("Packet type: " + packet.PacketType);
+			System.out.println("Sequence number: " + packet.SequenceNumber);
+			System.out.println("Client address: " + packet.PeerAddress);
+			System.out.println("Peer port: " + packet.PeerPort);
+			
+			return new BufferedReader(new StringReader(packet.Payload));
+		}
+	}
+	
+	public void Send(String payload) throws IOException
+	{
+		try
+		(
+			DatagramSocket ds = new DatagramSocket(mPort);
+		)
+		{
+			ByteBuffer output = ByteBuffer.allocate(1024);
+			
+			// Packet type
+			output.put((byte) 2);
+			
+			// Sequence Number
+			output.putInt(2000);
+			
+			// Peer IP
+			output.put(mClientAddress.getAddress());
+			
+			// Peer port
+			output.putShort((short) mClientPort);
+			
+			for (char c: payload.toCharArray())
+			{
+				output.put((byte) c);
+			}
+
+			DatagramPacket dp = new DatagramPacket(output.array(), output.position(), mClientAddress, mClientPort);
+			ds.send(dp);
 		}
 	}
 }
