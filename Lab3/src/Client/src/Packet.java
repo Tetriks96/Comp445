@@ -39,9 +39,12 @@ public class Packet
 		bytes.put(PeerAddress.getAddress());
 		bytes.putShort(PeerPort);
 		
-		for (char c: Payload.toCharArray())
+		if (Payload != null)
 		{
-			bytes.put((byte) c);
+			for (char c: Payload.toCharArray())
+			{
+				bytes.put((byte) c);
+			}
 		}
 		
 		return bytes.array();
