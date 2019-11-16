@@ -6,6 +6,11 @@ import java.net.UnknownHostException;
 
 public class TcpClient
 {
+	public static final byte SYN = 0;
+	public static final byte SYN_ACK = 1;
+	public static final byte ACK = 2;
+	public static final byte DATA = 3;
+	
 	private InetAddress mServerAddress;
 	private short mServerPort;
 	private UDPClient mUdpClient;
@@ -21,8 +26,10 @@ public class TcpClient
 	{
 		Handshake();
 		Thread.sleep(100);
+		
 		Packet packet = new Packet((byte)3, 3001, mServerAddress, mServerPort, payload);
 		mUdpClient.Send(packet);
+		Thread.sleep(100);
 	}
 	
 	public BufferedReader Receive() throws IOException
@@ -33,12 +40,12 @@ public class TcpClient
 	
 	private void Handshake() throws IOException
 	{
-		Packet syn = new Packet((byte)0, 1, mServerAddress, mServerPort, null);
+		Packet syn = new Packet(SYN, 1, mServerAddress, mServerPort, null);
 		mUdpClient.Send(syn);
 		
 		Packet synAck = mUdpClient.Receive();
 		
-		Packet ack = new Packet((byte)2, 2001, mServerAddress, mServerPort, null);
+		Packet ack = new Packet(ACK, 2001, mServerAddress, mServerPort, null);
 		mUdpClient.Send(ack);
 	}
 }

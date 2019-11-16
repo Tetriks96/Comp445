@@ -8,6 +8,11 @@ import java.util.Arrays;
 
 public class TcpServer
 {
+	public static final byte SYN = 0;
+	public static final byte SYN_ACK = 1;
+	public static final byte ACK = 2;
+	public static final byte DATA = 3;
+	
 	private InetAddress mClientAddress;
 	private short mClientPort;
 	private UDPServer mUdpServer;
@@ -26,7 +31,7 @@ public class TcpServer
 	
 	public void Send(String payload) throws IOException
 	{
-		Packet packet = new Packet((byte)3, 3000, mClientAddress, mClientPort, payload);
+		Packet packet = new Packet(DATA, 3000, mClientAddress, mClientPort, payload);
 		mUdpServer.Send(packet);
 	}
 	
@@ -36,7 +41,7 @@ public class TcpServer
 		mClientAddress = syn.PeerAddress;
 		mClientPort = syn.PeerPort;
 		
-		Packet synAck = new Packet((byte)1, 1000, mClientAddress, mClientPort, null);
+		Packet synAck = new Packet(SYN_ACK, 1000, mClientAddress, mClientPort, null);
 		mUdpServer.Send(synAck);
 		
 		Packet ack = mUdpServer.Receive();
