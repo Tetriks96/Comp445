@@ -1,3 +1,5 @@
 /Client.class
 /TcpClient.class
 /Packet.class
+/UPDClient.class
+/UDPClient.class
