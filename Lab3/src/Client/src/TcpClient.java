@@ -15,11 +15,16 @@ public class TcpClient
 	private short mServerPort;
 	private UDPClient mUdpClient;
 	
+	private int mSequenceNumber;
+	private int mServerSequenceNumber;
+	
 	public TcpClient(int port, InetAddress serverAddress, short serverPort) throws UnknownHostException
 	{
 		mServerAddress = serverAddress;
 		mServerPort = serverPort;
 		mUdpClient = new UDPClient(port);
+		
+		mSequenceNumber = 0;
 	}
 	
 	public void Send(String payload) throws IOException, InterruptedException
@@ -27,25 +32,38 @@ public class TcpClient
 		Handshake();
 		Thread.sleep(100);
 		
-		Packet packet = new Packet(DATA, 3001, mServerAddress, mServerPort, payload);
+		Packet packet = new Packet(DATA, mServerSequenceNumber, mServerAddress, mServerPort, payload);
+		Send(packet);
+	}
+	
+	private void Send(Packet packet) throws IOException
+	{
 		mUdpClient.Send(packet);
-		Thread.sleep(100);
+		mServerSequenceNumber++;
 	}
 	
 	public BufferedReader Receive() throws IOException
 	{
-		Packet packet = mUdpClient.Receive();
+		Packet packet = InnerReceive();
 		return new BufferedReader(new StringReader(packet.Payload));
+	}
+	
+	private Packet InnerReceive() throws IOException
+	{
+		Packet packet = mUdpClient.Receive();
+		mSequenceNumber++;
+		return packet;
 	}
 	
 	private void Handshake() throws IOException
 	{
-		Packet syn = new Packet(SYN, 1, mServerAddress, mServerPort, null);
-		mUdpClient.Send(syn);
+		Packet syn = new Packet(SYN, mSequenceNumber, mServerAddress, mServerPort, null);
+		Send(syn);
 		
-		Packet synAck = mUdpClient.Receive();
+		Packet synAck = InnerReceive();
+		mServerSequenceNumber = synAck.SequenceNumber;
 		
-		Packet ack = new Packet(ACK, 2001, mServerAddress, mServerPort, null);
-		mUdpClient.Send(ack);
+		Packet ack = new Packet(ACK, mServerSequenceNumber, mServerAddress, mServerPort, null);
+		Send(ack);
 	}
 }
