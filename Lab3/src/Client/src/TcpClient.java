@@ -27,7 +27,7 @@ public class TcpClient
 		Handshake();
 		Thread.sleep(100);
 		
-		Packet packet = new Packet((byte)3, 3001, mServerAddress, mServerPort, payload);
+		Packet packet = new Packet(DATA, 3001, mServerAddress, mServerPort, payload);
 		mUdpClient.Send(packet);
 		Thread.sleep(100);
 	}
