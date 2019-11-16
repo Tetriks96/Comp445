@@ -6,6 +6,11 @@ import java.util.Arrays;
 
 public class Packet
 {
+	public static final byte SYN = 0;
+	public static final byte SYN_ACK = 1;
+	public static final byte ACK = 2;
+	public static final byte DATA = 3;
+	
 	public byte PacketType;
 	public int SequenceNumber;
 	public InetAddress PeerAddress;
@@ -54,11 +59,28 @@ public class Packet
 	public String GetHeader()
 	{
 		String header = "";
-		header += "Packet type: " + PacketType + "\n";
+		header += "Packet type: " + PacketTypeToString(PacketType) + "\n";
 		header += "Sequence number: " + SequenceNumber + "\n";
 		header += "Peer address: " + PeerAddress + "\n";
 		header += "Peer port: " + PeerPort;
 
 		return header;
+	}
+	
+	private String PacketTypeToString(byte type)
+	{
+		switch(type)
+		{
+		case SYN:
+			return "SYN";
+		case SYN_ACK:
+			return "SYN-ACK";
+		case ACK:
+			return "ACK";
+		case DATA:
+			return "DATA";
+		default:
+			return "";
+		}
 	}
 }
