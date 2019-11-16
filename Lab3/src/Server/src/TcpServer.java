@@ -8,20 +8,26 @@ import java.util.Arrays;
 
 public class TcpServer
 {
+	private InetAddress mClientAddress;
+	private short mClientPort;
 	private UDPServer mUdpServer;
 	
 	public TcpServer(int port) throws IOException
 	{
+		mClientAddress = InetAddress.getByName("localhost");
+		mClientPort = 8081;
 		mUdpServer = new UDPServer(port);
 	}
 
 	public BufferedReader Receive() throws IOException
 	{
-		return mUdpServer.Receive();
+		Packet packet = mUdpServer.Receive();
+		return new BufferedReader(new StringReader(packet.Payload));
 	}
 	
 	public void Send(String payload) throws IOException
 	{
-		mUdpServer.Send(payload);
+		Packet packet = new Packet((byte)2, 2000, mClientAddress, mClientPort, payload);
+		mUdpServer.Send(packet);
 	}
 }

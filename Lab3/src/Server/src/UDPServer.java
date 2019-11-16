@@ -9,21 +9,17 @@ import java.util.Arrays;
 public class UDPServer
 {
 	private int mPort;
-	private InetAddress mClientAddress;
-	private short mClientPort;
 	private InetAddress mRouterAddress;
 	private short mRouterPort;
 	
 	public UDPServer(int port) throws IOException
 	{
 		mPort = port;
-		mClientAddress = InetAddress.getByName("localhost");
-		mClientPort = 8081;
 		mRouterAddress = InetAddress.getByName("localhost");
 		mRouterPort = 3000;
 	}
 
-	public BufferedReader Receive() throws IOException
+	public Packet Receive() throws IOException
 	{
 		try
 		(
@@ -39,20 +35,18 @@ public class UDPServer
 		    Packet packet = new Packet(data);
 
 		    System.out.println(packet.GetHeader());
-			
-			return new BufferedReader(new StringReader(packet.Payload));
+		    
+		    return packet;
 		}
 	}
 	
-	public void Send(String payload) throws IOException
+	public void Send(Packet packet) throws IOException
 	{
 		try
 		(
 			DatagramSocket ds = new DatagramSocket(mPort);
 		)
 		{
-			Packet packet = new Packet((byte)2, 2000, mClientAddress, mClientPort, payload);
-			
 			byte[] output = packet.getBytes();
 
 			DatagramPacket dp = new DatagramPacket(output, output.length, mRouterAddress, mRouterPort);

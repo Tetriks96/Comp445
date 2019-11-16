@@ -1,24 +1,31 @@
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class TcpClient
 {
+	private InetAddress mServerAddress;
+	private short mServerPort;
 	private UDPClient mUdpClient;
 	
 	public TcpClient(int port, InetAddress serverAddress, short serverPort) throws UnknownHostException
 	{
-		mUdpClient = new UDPClient(port, serverAddress, serverPort);
+		mServerAddress = serverAddress;
+		mServerPort = serverPort;
+		mUdpClient = new UDPClient(port);
 	}
 	
 	public void Send(String payload) throws IOException
 	{
-		mUdpClient.Send(payload);
+		Packet packet = new Packet((byte)1, 1000, mServerAddress, mServerPort, payload);
+		mUdpClient.Send(packet);
 	}
 	
 	public BufferedReader Receive() throws IOException
 	{
-		return mUdpClient.Receive();
+		Packet packet = mUdpClient.Receive();
+		return new BufferedReader(new StringReader(packet.Payload));
 	}
 }

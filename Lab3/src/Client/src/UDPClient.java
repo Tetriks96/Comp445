@@ -10,29 +10,23 @@ import java.util.Arrays;
 public class UDPClient
 {
 	private int mPort;
-	private InetAddress mServerAddress;
-	private short mServerPort;
 	private InetAddress mRouterAddress;
 	private int mRouterPort;
 	
-	public UDPClient(int port, InetAddress serverAddress, short serverPort) throws UnknownHostException
+	public UDPClient(int port) throws UnknownHostException
 	{
 		mPort = port;
-		mServerAddress = serverAddress;
-		mServerPort = serverPort;
 		mRouterAddress = InetAddress.getByName("localhost");
 		mRouterPort = 3000;
 	}
 	
-	public void Send(String payload) throws IOException
+	public void Send(Packet packet) throws IOException
 	{
 		try
 		(
 			DatagramSocket ds = new DatagramSocket(mPort);
 		)
 		{
-			Packet packet = new Packet((byte)1, 1000, mServerAddress, mServerPort, payload);
-			
 			byte[] output = packet.getBytes();
 
 			DatagramPacket dp = new DatagramPacket(output, output.length, mRouterAddress, mRouterPort);
@@ -40,7 +34,7 @@ public class UDPClient
 		}
 	}
 	
-	public BufferedReader Receive() throws IOException
+	public Packet Receive() throws IOException
 	{
 		try
 		(
@@ -56,8 +50,8 @@ public class UDPClient
 		    Packet packet = new Packet(data);
 
 		    System.out.println(packet.GetHeader());
-			
-			return new BufferedReader(new StringReader(packet.Payload));
+		    
+		    return packet;
 		}
 	}
 }
