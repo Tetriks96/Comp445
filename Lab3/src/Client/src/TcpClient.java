@@ -17,9 +17,11 @@ public class TcpClient
 		mUdpClient = new UDPClient(port);
 	}
 	
-	public void Send(String payload) throws IOException
+	public void Send(String payload) throws IOException, InterruptedException
 	{
-		Packet packet = new Packet((byte)1, 1000, mServerAddress, mServerPort, payload);
+		Handshake();
+		Thread.sleep(100);
+		Packet packet = new Packet((byte)3, 3001, mServerAddress, mServerPort, payload);
 		mUdpClient.Send(packet);
 	}
 	
@@ -27,5 +29,16 @@ public class TcpClient
 	{
 		Packet packet = mUdpClient.Receive();
 		return new BufferedReader(new StringReader(packet.Payload));
+	}
+	
+	private void Handshake() throws IOException
+	{
+		Packet syn = new Packet((byte)0, 1, mServerAddress, mServerPort, null);
+		mUdpClient.Send(syn);
+		
+		Packet synAck = mUdpClient.Receive();
+		
+		Packet ack = new Packet((byte)2, 2001, mServerAddress, mServerPort, null);
+		mUdpClient.Send(ack);
 	}
 }

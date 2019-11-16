@@ -50,6 +50,7 @@ public class UDPClient
 		    Packet packet = new Packet(data);
 
 		    System.out.println(packet.GetHeader());
+		    System.out.println();
 		    
 		    return packet;
 		}

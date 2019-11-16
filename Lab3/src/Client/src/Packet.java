@@ -32,7 +32,8 @@ public class Packet
 	
 	public byte[] getBytes()
 	{
-		ByteBuffer bytes = ByteBuffer.allocate(11 + Payload.length());
+		int payloadLength = Payload != null ? Payload.length() : 0;
+		ByteBuffer bytes = ByteBuffer.allocate(11 + payloadLength);
 		
 		bytes.put(PacketType);
 		bytes.putInt(SequenceNumber);

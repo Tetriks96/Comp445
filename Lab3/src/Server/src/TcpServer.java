@@ -14,20 +14,31 @@ public class TcpServer
 	
 	public TcpServer(int port) throws IOException
 	{
-		mClientAddress = InetAddress.getByName("localhost");
-		mClientPort = 8081;
 		mUdpServer = new UDPServer(port);
 	}
 
 	public BufferedReader Receive() throws IOException
 	{
+		Handshake();
 		Packet packet = mUdpServer.Receive();
 		return new BufferedReader(new StringReader(packet.Payload));
 	}
 	
 	public void Send(String payload) throws IOException
 	{
-		Packet packet = new Packet((byte)2, 2000, mClientAddress, mClientPort, payload);
+		Packet packet = new Packet((byte)3, 3000, mClientAddress, mClientPort, payload);
 		mUdpServer.Send(packet);
+	}
+	
+	private void Handshake() throws IOException
+	{
+		Packet syn = mUdpServer.Receive();
+		mClientAddress = syn.PeerAddress;
+		mClientPort = syn.PeerPort;
+		
+		Packet synAck = new Packet((byte)1, 1000, mClientAddress, mClientPort, null);
+		mUdpServer.Send(synAck);
+		
+		Packet ack = mUdpServer.Receive();
 	}
 }
