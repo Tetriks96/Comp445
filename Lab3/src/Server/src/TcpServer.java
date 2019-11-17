@@ -32,6 +32,8 @@ public class TcpServer
 		
 		Packet data = mUdpServer.Receive();
 		
+		mSequenceNumber++;
+		
 		Packet ack = new Packet(ACK, mSequenceNumber, mClientAddress, mClientPort, null);
 		mUdpServer.Send(ack);
 		
@@ -59,5 +61,6 @@ public class TcpServer
 	{
 		mUdpServer.Send(packet);
 		Packet ack = mUdpServer.Receive();
+		mClientSequenceNumber = ack.SequenceNumber;
 	}
 }

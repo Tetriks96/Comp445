@@ -39,6 +39,8 @@ public class TcpClient
 	{
 		Packet data = mUdpClient.Receive();
 		
+		mSequenceNumber++;
+		
 		Packet ack = new Packet(ACK, mSequenceNumber, mServerAddress, mServerPort, null);
 		mUdpClient.Send(ack);
 		
@@ -49,6 +51,7 @@ public class TcpClient
 	{
 		mUdpClient.Send(packet);
 		Packet ack = mUdpClient.Receive();
+		mServerSequenceNumber = ack.SequenceNumber;
 	}
 	
 	private void Handshake() throws IOException, InterruptedException
@@ -59,7 +62,9 @@ public class TcpClient
 		Packet synAck = mUdpClient.Receive();
 		mServerSequenceNumber = synAck.SequenceNumber;
 		
-		Packet ack = new Packet(ACK, synAck.SequenceNumber, mServerAddress, mServerPort, null);
+		mSequenceNumber++;
+		
+		Packet ack = new Packet(ACK, mSequenceNumber, mServerAddress, mServerPort, null);
 		mUdpClient.Send(ack);
 	}
 }
