@@ -41,9 +41,7 @@ public class TcpServer
 	public void Send(String payload) throws IOException, InterruptedException
 	{
 		Packet packet = new Packet(DATA, mClientSequenceNumber, mClientAddress, mClientPort, payload);
-		mUdpServer.Send(packet);
-		
-		Packet ack = mUdpServer.Receive();
+		Send(packet);
 	}
 	
 	private void Handshake() throws IOException, InterruptedException
@@ -54,8 +52,12 @@ public class TcpServer
 		mClientPort = syn.PeerPort;
 		
 		Packet synAck = new Packet(SYN_ACK, mSequenceNumber, mClientAddress, mClientPort, null);
-		mUdpServer.Send(synAck);
-		
+		Send(synAck);
+	}
+	
+	private void Send(Packet packet) throws IOException, InterruptedException
+	{
+		mUdpServer.Send(packet);
 		Packet ack = mUdpServer.Receive();
 	}
 }

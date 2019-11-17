@@ -32,9 +32,7 @@ public class TcpClient
 		Handshake();
 		
 		Packet data = new Packet(DATA, mServerSequenceNumber, mServerAddress, mServerPort, payload);
-		mUdpClient.Send(data);
-		
-		Packet ack = mUdpClient.Receive();
+		Send(data);
 	}
 	
 	public BufferedReader Receive() throws IOException, InterruptedException
@@ -45,6 +43,12 @@ public class TcpClient
 		mUdpClient.Send(ack);
 		
 		return new BufferedReader(new StringReader(data.Payload));
+	}
+	
+	private void Send(Packet packet) throws IOException, InterruptedException
+	{
+		mUdpClient.Send(packet);
+		Packet ack = mUdpClient.Receive();
 	}
 	
 	private void Handshake() throws IOException, InterruptedException
