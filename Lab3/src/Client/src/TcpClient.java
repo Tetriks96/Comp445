@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TcpClient
 {
@@ -18,6 +20,8 @@ public class TcpClient
 	private int mSequenceNumber;
 	private int mServerSequenceNumber;
 	
+	private Map<Integer, Packet> mSentPackets;
+	
 	public TcpClient(int port, InetAddress serverAddress, short serverPort) throws UnknownHostException
 	{
 		mServerAddress = serverAddress;
@@ -25,6 +29,8 @@ public class TcpClient
 		mUdpClient = new UDPClient(port);
 		
 		mSequenceNumber = 0;
+		
+		mSentPackets = new HashMap<Integer, Packet>();
 	}
 	
 	public void Send(String payload) throws IOException, InterruptedException
@@ -50,6 +56,10 @@ public class TcpClient
 	private void Send(Packet packet) throws IOException, InterruptedException
 	{
 		mUdpClient.Send(packet);
+		if (!mSentPackets.containsKey(packet.SequenceNumber))
+		{
+			mSentPackets.put(packet.SequenceNumber, packet);
+		}
 		Packet ack = mUdpClient.Receive();
 		mServerSequenceNumber = ack.SequenceNumber;
 	}
