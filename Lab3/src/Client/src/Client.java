@@ -26,8 +26,6 @@ public class Client
 				input += (char)c;
 			}
 			in.close();
-			
-			System.out.println(input);
 		}
 		catch (Exception e)
 		{

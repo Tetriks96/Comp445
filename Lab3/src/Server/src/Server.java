@@ -25,9 +25,6 @@ public class Server
 					}
 					in.close();
 					
-					System.out.println(input);
-					System.out.println();
-					
 					String output = "Response";
 
 					tcpServer.Send(output);

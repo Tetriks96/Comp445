@@ -44,6 +44,10 @@ public class UDPClient
 	    Packet packet = new Packet(data);
 
 	    System.out.println(packet.GetHeader());
+	    if (packet.Payload != null && packet.Payload.length() > 0)
+	    {
+	    	System.out.println(packet.Payload);
+	    }
 	    System.out.println();
 	    
 	    return packet;
