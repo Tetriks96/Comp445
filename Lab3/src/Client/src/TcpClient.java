@@ -22,6 +22,8 @@ public class TcpClient
 	
 	private Map<Integer, Packet> mSentPackets;
 	
+	private Packet mOutOfOrderPacket;
+	
 	public TcpClient(int port, InetAddress serverAddress, short serverPort) throws UnknownHostException
 	{
 		mServerAddress = serverAddress;
@@ -31,6 +33,8 @@ public class TcpClient
 		mSequenceNumber = 0;
 		
 		mSentPackets = new HashMap<Integer, Packet>();
+		
+		mOutOfOrderPacket = null;
 	}
 	
 	public void Send(String payload) throws IOException, InterruptedException
@@ -43,7 +47,16 @@ public class TcpClient
 	
 	public BufferedReader Receive() throws IOException, InterruptedException
 	{
-		Packet data = mUdpClient.Receive();
+		Packet data;
+		if (mOutOfOrderPacket != null)
+		{
+			data = mOutOfOrderPacket;
+			mOutOfOrderPacket = null;
+		}
+		else
+		{
+			data = mUdpClient.Receive();
+		}
 		
 		mSequenceNumber++;
 		
@@ -61,6 +74,11 @@ public class TcpClient
 			mSentPackets.put(packet.SequenceNumber, packet);
 		}
 		Packet ack = mUdpClient.Receive();
+		if (ack.PacketType != ACK)
+		{
+			mOutOfOrderPacket = ack;
+			ack = mUdpClient.Receive();
+		}
 		mServerSequenceNumber = ack.SequenceNumber;
 	}
 	

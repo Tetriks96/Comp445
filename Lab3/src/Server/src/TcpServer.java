@@ -1,10 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,19 +21,32 @@ public class TcpServer
 	
 	private Map<Integer, Packet> mSentPackets;
 	
+	private Packet mOutOfOrderPacket;
+	
 	public TcpServer(int port) throws IOException
 	{
 		mUdpServer = new UDPServer(port);
 		mSequenceNumber = 0;
 		
 		mSentPackets = new HashMap<Integer, Packet>();
+		
+		mOutOfOrderPacket = null;
 	}
 
 	public BufferedReader Receive() throws IOException, InterruptedException
 	{
 		Handshake();
 		
-		Packet data = mUdpServer.Receive();
+		Packet data;
+		if (mOutOfOrderPacket != null)
+		{
+			data = mOutOfOrderPacket;
+			mOutOfOrderPacket = null;
+		}
+		else
+		{
+			data = mUdpServer.Receive();
+		}
 		
 		mSequenceNumber++;
 		
@@ -71,6 +81,11 @@ public class TcpServer
 			mSentPackets.put(packet.SequenceNumber, packet);
 		}
 		Packet ack = mUdpServer.Receive();
+		if (ack.PacketType != ACK)
+		{
+			mOutOfOrderPacket = ack;
+			ack = mUdpServer.Receive();
+		}
 		mClientSequenceNumber = ack.SequenceNumber;
 	}
 }
