@@ -24,7 +24,7 @@ public class TcpClient
 	
 	private Packet mOutOfOrderPacket;
 	
-	public TcpClient(int port, InetAddress serverAddress, short serverPort) throws UnknownHostException
+	public TcpClient(int port, InetAddress serverAddress, short serverPort) throws IOException
 	{
 		mServerAddress = serverAddress;
 		mServerPort = serverPort;
