@@ -26,42 +26,36 @@ public class TcpServer
 		mSequenceNumber = 0;
 	}
 
-	public BufferedReader Receive() throws IOException
+	public BufferedReader Receive() throws IOException, InterruptedException
 	{
 		Handshake();
-		Packet packet = InnerReceive();
-		return new BufferedReader(new StringReader(packet.Payload));
+		
+		Packet data = mUdpServer.Receive();
+		
+		Packet ack = new Packet(ACK, mSequenceNumber, mClientAddress, mClientPort, null);
+		mUdpServer.Send(ack);
+		
+		return new BufferedReader(new StringReader(data.Payload));
 	}
 	
-	private Packet InnerReceive() throws IOException
-	{
-		Packet packet = mUdpServer.Receive();
-		mSequenceNumber++;
-		return packet;
-	}
-	
-	public void Send(String payload) throws IOException
+	public void Send(String payload) throws IOException, InterruptedException
 	{
 		Packet packet = new Packet(DATA, mClientSequenceNumber, mClientAddress, mClientPort, payload);
-		Send(packet);
-	}
-	
-	private void Send(Packet packet) throws IOException
-	{
 		mUdpServer.Send(packet);
-		mClientSequenceNumber++;
+		
+		Packet ack = mUdpServer.Receive();
 	}
 	
-	private void Handshake() throws IOException
+	private void Handshake() throws IOException, InterruptedException
 	{
-		Packet syn = InnerReceive();
+		Packet syn = mUdpServer.Receive();
+		mClientSequenceNumber = syn.SequenceNumber;
 		mClientAddress = syn.PeerAddress;
 		mClientPort = syn.PeerPort;
-		mClientSequenceNumber = syn.SequenceNumber;
 		
 		Packet synAck = new Packet(SYN_ACK, mSequenceNumber, mClientAddress, mClientPort, null);
-		Send(synAck);
+		mUdpServer.Send(synAck);
 		
-		Packet ack = InnerReceive();
+		Packet ack = mUdpServer.Receive();
 	}
 }

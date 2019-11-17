@@ -41,7 +41,7 @@ public class UDPServer
 		}
 	}
 	
-	public void Send(Packet packet) throws IOException
+	public void Send(Packet packet) throws IOException, InterruptedException
 	{
 		try
 		(
@@ -51,6 +51,9 @@ public class UDPServer
 			byte[] output = packet.getBytes();
 
 			DatagramPacket dp = new DatagramPacket(output, output.length, mRouterAddress, mRouterPort);
+			
+			Thread.sleep(50);
+			
 			ds.send(dp);
 		}
 	}
