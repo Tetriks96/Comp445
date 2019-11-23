@@ -54,7 +54,7 @@ public class Post extends Request
 		}
 	}
 	
-	protected void CompleteHeaders(PrintWriter out)
+	protected String CompleteHeaders(String out)
 	{
 		String body = "";
 		
@@ -82,17 +82,19 @@ public class Post extends Request
 			}
 		}
 
-		out.println("Content-Length: " + body.length());
+		out += "Content-Length: " + body.length() + "\n";
 	    
 	    if (body.length() > 0)
 	    {
-		    out.println("Content-Type: text/plain");
-		    out.println();
-			out.println(body);
+		    out += "Content-Type: text/plain" + "\n";
+		    out += "\n";
+			out += body + "\n";
 		}
 	    else
 	    {
-		    out.println();
+		    out += "\n";
 	    }
+	    
+	    return out;
 	}
 }

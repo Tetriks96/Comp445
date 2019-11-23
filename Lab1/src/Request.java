@@ -95,25 +95,26 @@ public abstract class Request {
 		{
 			InetAddress address = InetAddress.getByName(url.getHost());
 			int port = url.getPort() != -1 ? url.getPort() : url.getDefaultPort();
-			Socket socket = new Socket(address, port);
 			
-			boolean autoflush = true;
-			PrintWriter out = new PrintWriter(socket.getOutputStream(), autoflush);
-			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			TcpClient tcpClient = new TcpClient(8081, address, (short)port);
 			
-		    out.println(this.method + " " + url.toString() + " HTTP/1.0");
-		    out.println("Host: " + url.getHost());
+			String out = "";
+			
+		    out += this.method + " " + url.toString() + " HTTP/1.0" + "\n";
+		    out += "Host: " + url.getHost() + "\n";
 		    for (String key : headers.keySet())
 		    {
-		    	out.println(key + ": " + headers.get(key));
+		    	out += key + ": " + headers.get(key) + "\n";
 		    }
-		    out.println("Connection: Close");
+		    out += "Connection: Close" + "\n";
 		    
-		    CompleteHeaders(out);
+		    out = CompleteHeaders(out);
+		    
+		    tcpClient.Send(out);
 		    
 		    StringBuilder sb = new StringBuilder(8096);
 		    
-		    while (!in.ready());
+		    BufferedReader in = tcpClient.Receive();
 		    
 		    boolean bodyReached = false;
 
@@ -142,13 +143,8 @@ public abstract class Request {
 
 	        	line = in.readLine();
 	        }
-		    socket.close();
 
-		    if (this.outputPath == null)
-		    {
-			    System.out.println(sb.toString());
-		    }
-		    else
+		    if (this.outputPath != null)
 		    {
 		    	try (FileWriter fw = new FileWriter(this.outputPath))
     			{
@@ -174,5 +170,5 @@ public abstract class Request {
 		}
 	}
 	
-	abstract protected void CompleteHeaders(PrintWriter out);
+	abstract protected String CompleteHeaders(String out);
 }

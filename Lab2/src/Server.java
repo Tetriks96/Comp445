@@ -20,31 +20,28 @@ public class Server
 	public void Listen()
 	{
 		try
-		(
-			ServerSocket serverSocket = new ServerSocket(this.port);
-		)
 		{
+			TcpServer tcpServer = new TcpServer(port);
+			
 			System.out.println("Http File Server started!");
 			System.out.println();
 			
 			while (true)
 			{
 				try
-				(
-					Socket clientSocket = serverSocket.accept();
-				    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-				    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-				)
 				{
+					BufferedReader in = tcpServer.Receive();
+					String out = "";
+					
 					String input;
 					input = in.readLine();
-					PrintIfVerbose(input);
 					
 					String[] firstLine = input.split(" ");
 					
 					if (firstLine.length < 2)
 					{
-						out.println("HTTP/1.0 400 Bad Request");
+						out += "HTTP/1.0 400 Bad Request" + "\n";
+						tcpServer.Send(out);
 						return;
 					}
 					
@@ -66,10 +63,7 @@ public class Server
 				    	{
 				    		contentLength = Integer.parseInt(input.split(" ")[1]);
 				    	}
-				    	PrintIfVerbose(input);
 				    }
-				    
-				    PrintIfVerbose();
 
 			    	String content = "";
 				    
@@ -80,22 +74,24 @@ public class Server
 				    	{
 					    	content += c;
 				    	}
-				    	PrintIfVerbose(content);
-				    	PrintIfVerbose();
 				    }
 				    
 				    if (param.contains(".."))
 				    {
-						out.println("HTTP/1.0 403 Forbidden");
+						out += "HTTP/1.0 403 Forbidden" + "\n";
 				    }
 				    else if (isPostRequest)
 				    {
-				        out.println(fileSystem.Write(param, content));
+				        out += fileSystem.Write(param, content) + "\n";
 				    }
 				    else
 				    {
-				        out.println(fileSystem.Read(param));
+				        out += fileSystem.Read(param) + "\n";
 				    }
+				    
+				    tcpServer.Send(out);
+				    
+				    System.out.println();
 				}
 				catch (Exception e)
 				{
@@ -109,11 +105,6 @@ public class Server
 			PrintIfVerbose("Server crashed!");
 			PrintIfVerbose(e.toString());
 		}
-	}
-	
-	void PrintIfVerbose()
-	{
-		PrintIfVerbose("");
 	}
 	
 	void PrintIfVerbose(String string)

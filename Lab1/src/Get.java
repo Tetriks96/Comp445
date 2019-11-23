@@ -8,8 +8,9 @@ public class Get extends Request
 		this.method = "GET";
 	}
 	
-	protected void CompleteHeaders(PrintWriter out)
+	protected String CompleteHeaders(String out)
 	{
-		out.println();
+		out += "\n";
+		return out;
 	}
 }

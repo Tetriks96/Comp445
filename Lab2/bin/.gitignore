@@ -4,3 +4,6 @@
 /FileSystem.class
 /TcpServer.class
 /TcpServer2.class
+/Server/
+/Packet.class
+/UDPServer.class
